@@ -200,10 +200,9 @@ function entropyToMnemonic(entropy, wordlist) {
                 (shouldAddSeparator ? separatorByteLength : 0),
         };
     }, { workingBuffer: Buffer.alloc(bufferSize), offset: 0 });
-    // Return the upstream-compatible mnemonic string instead of a raw Buffer
-    // so callers can rely on `===` comparisons, JSON serialization, and the
-    // documented bip39 API contract.
-    return workingBuffer.toString('utf8');
+    // Preserve the MetaMask/bip39 fork contract: return a raw Buffer to prevent
+    // sensitive mnemonic seed phrases from entering the JavaScript string heap.
+    return workingBuffer;
 }
 exports.entropyToMnemonic = entropyToMnemonic;
 function generateMnemonic(strength, rng, wordlist) {
