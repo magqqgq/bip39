@@ -192,7 +192,7 @@ export function mnemonicToEntropy(
 export function entropyToMnemonic(
   entropy: Buffer | string,
   wordlist?: string[],
-): string {
+): Buffer {
   if (!Buffer.isBuffer(entropy)) {
     // Reject malformed hex up front: Buffer.from(value, 'hex') silently
     // truncates at the first invalid byte pair (and drops a trailing
@@ -280,17 +280,17 @@ export function entropyToMnemonic(
     },
     { workingBuffer: Buffer.alloc(bufferSize), offset: 0 },
   );
-  // Return the upstream-compatible mnemonic string instead of a raw Buffer
-  // so callers can rely on `===` comparisons, JSON serialization, and the
-  // documented bip39 API contract.
-  return workingBuffer.toString('utf8');
+
+  // Preserve the MetaMask/bip39 fork contract: return a raw Buffer to prevent
+  // sensitive mnemonic seed phrases from entering the JavaScript string heap.
+  return workingBuffer;
 }
 
 export function generateMnemonic(
   strength?: number,
   rng?: (size: number) => Buffer,
   wordlist?: string[],
-): string {
+): Buffer {
   strength = strength || 128;
   if (strength % 32 !== 0) {
     throw new TypeError(INVALID_ENTROPY);
